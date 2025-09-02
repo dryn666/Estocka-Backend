@@ -48,3 +48,16 @@ def delete_product(product_id: int, db: Session = Depends(get_db)):
     db.delete(prod)
     db.commit()
     return None
+
+@router.get("/low-stock", response_model=List[schemas.ProductOut])
+def list_low_stock_products(db: Session = Depends(get_db)):
+    """
+    Lista produtos com quantity <= min_stock.
+    Útil para alertar reposição.
+    """
+    return (
+        db.query(models.Product)
+        .filter(models.Product.quantity <= models.Product.min_stock)
+        .order_by(models.Product.quantity.asc())
+        .all()
+    )
